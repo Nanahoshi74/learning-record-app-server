@@ -9,18 +9,16 @@ const UserSchema = new mongoose.Schema(
       max: 25,
       unique: true,
     },
-    email: {
-      type: String,
-      required: true,
-      max: 50,
-      unique: true,
-    },
     password: {
       type: String,
       required: true,
       min: 4,
       max: 50,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    }
   },
   { timestamps: true }
 );

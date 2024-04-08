@@ -18,6 +18,7 @@ const RecordSchema = new mongoose.Schema(
     },
     studyTime: {
       type: Object,
+      default: {},
     },
   },
   { timeseries: true }

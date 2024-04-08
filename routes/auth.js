@@ -6,7 +6,6 @@ router.post("/register", async (req, res) => {
   try {
     const newUser = await new User({
       username: req.body.username,
-      email: req.body.email,
       password: req.body.password,
     });
 
@@ -20,7 +19,7 @@ router.post("/register", async (req, res) => {
 //ログイン
 router.post("/login", async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ username: req.body.username });
     if (!user) return res.status(404).json("存在しないユーザーです");
 
     const ValidPassword = req.body.password === user.password;
