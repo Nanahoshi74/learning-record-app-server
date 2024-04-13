@@ -14,7 +14,7 @@ const RecordSchema = new mongoose.Schema(
       type: String,
     },
     date: {
-      type: Date,
+      type: String,
     },
     studyTime: {
       type: Object,

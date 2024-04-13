@@ -2,6 +2,33 @@ const router = require("express").Router();
 const Record = require("../models/Record");
 const User = require("../models/User");
 
+//その日にちに記録を追加する
+router.put("/add/:date", async (req, res) => {
+  const username = req.query.username;
+  const password = req.query.password;
+  try {
+    const user = await User.findOne({ username: username });
+
+    if (user.password === password) {
+      const date = req.params.date;
+      const record = await Record.findOne({ date: date });
+
+      const subject = req.body.subject;
+      const subject_time = req.body.subject_time;
+      record.studyTime[subject] = subject_time;
+      // const newRecord = record;
+      await record.updateOne({
+        studyTime: record.studyTime,
+      });
+      return res.status(200).json(record);
+    } else {
+      return res.status(403).json("他の人の記録に追加できません");
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
 //記録を作成する
 router.post("/", async (req, res) => {
   const newRecord = new Record(req.body);
@@ -32,21 +59,32 @@ router.put("/:id", async (req, res) => {
 
 //ここより下、ログインしている本人以外見えてはいけないから変える必要あいそう
 
-//記録の取得
-// router.get("/:id", async (req, res) => {
-//   try {
-//     const record = await Record.findById(req.params.id);
-//     return res.status(200).json(record);
-//   } catch (err) {
-//     return res.status(500).json(err);
-//   }
-// });
+//ユーザとdateからその日の記録を返す
+router.get("/record/:date", async (req, res) => {
+  const username = req.query.username;
+  const password = req.query.password;
+  try {
+    const user = await User.findOne({ username: username });
+    if (user.password === password) {
+      const date = req.params.date;
+      const record = await Record.findOne({ date: date });
+      return res.status(200).json(record);
+    } else {
+      return res.status(403).json("あなたは他人の記録を見ることはできません");
+    }
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json(err);
+  }
+});
 
 //ホームでの全ての記録の取得;
-router.get("/all/:username", async (req, res) => {
+router.get("/all", async (req, res) => {
+  const username = req.query.username;
+  const password = req.query.password;
   try {
-    const user = await User.findOne({ username: req.params.username });
-    if (user.password === req.body.password) {
+    const user = await User.findOne({ username: username });
+    if (user.password === password) {
       const records = await Record.find({ userId: user._id });
       return res.status(200).json(records);
     } else {
@@ -56,23 +94,15 @@ router.get("/all/:username", async (req, res) => {
     return res.status(500).json(err);
   }
 });
-// router.get("/all/:username", async (req, res) => {
-//   try {
-//     const user = await User.findOne({ username: req.params.username });
-//     const records = await Record.find({ userId: user._id });
-//     return res.status(200).json(records);
-//   } catch (err) {
-//     return res.status(500).json(err);
-//   }
-// });
 
-//日付と名前からその人の記録を取得する
-// router.get("/study/:/:date", async (req, res) => {
-//   try {
-//     // const record = await
-//   } catch (err) {
-//     return res.status(500).json(err);
-//   }
-// });
+//記録の取得;
+router.get("/:id", async (req, res) => {
+  try {
+    const record = await Record.findById(req.params.id);
+    return res.status(200).json(record);
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
 
 module.exports = router;
