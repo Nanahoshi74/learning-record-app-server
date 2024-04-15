@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const { findOne } = require("../models/Record");
 const User = require("../models/User");
+const bccrypt = require("bcrypt");
 
 //ユーザー登録
 router.post("/register", async (req, res) => {
@@ -9,9 +10,10 @@ router.post("/register", async (req, res) => {
     if (isexist) {
       return res.status(200).json("exist");
     }
+    const hashed_password = await bccrypt.hashSync(req.body.password, 10);
     const newUser = await new User({
       username: req.body.username,
-      password: req.body.password,
+      password: hashed_password,
     });
 
     const user = await newUser.save();
@@ -27,9 +29,13 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (!user) return res.status(404).json("存在しないユーザーです");
 
-    const ValidPassword = req.body.password === user.password;
+    // const enterd_password = await bccrypt.hashSync(req.body.password, 10);
+    const isequal_password = await bccrypt.compare(
+      req.body.password,
+      user.password
+    );
 
-    if (!ValidPassword) return res.status(400).json("パスワードが違います");
+    if (!isequal_password) return res.status(400).json("パスワードが違います");
     return res.status(200).json(user);
   } catch (err) {
     return res.status(500).json(err);
