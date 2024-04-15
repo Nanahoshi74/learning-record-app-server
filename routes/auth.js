@@ -29,7 +29,6 @@ router.post("/login", async (req, res) => {
     const user = await User.findOne({ username: req.body.username });
     if (!user) return res.status(404).json("存在しないユーザーです");
 
-    // const enterd_password = await bccrypt.hashSync(req.body.password, 10);
     const isequal_password = await bccrypt.compare(
       req.body.password,
       user.password
