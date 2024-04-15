@@ -1,9 +1,14 @@
 const router = require("express").Router();
+const { findOne } = require("../models/Record");
 const User = require("../models/User");
 
 //ユーザー登録
 router.post("/register", async (req, res) => {
   try {
+    const isexist = await User.findOne({ username: req.body.username });
+    if (isexist) {
+      return res.status(200).json("exist");
+    }
     const newUser = await new User({
       username: req.body.username,
       password: req.body.password,

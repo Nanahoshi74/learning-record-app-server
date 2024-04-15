@@ -2,7 +2,7 @@ const router = require("express").Router();
 const Record = require("../models/Record");
 const User = require("../models/User");
 
-//その日にちに記録を追加する
+//その日にちに記録を追加、編集する
 router.put("/add/:date", async (req, res) => {
   const username = req.query.username;
   const password = req.query.password;
@@ -11,7 +11,9 @@ router.put("/add/:date", async (req, res) => {
 
     if (user.password === password) {
       const date = req.params.date;
-      const record = await Record.findOne({ date: date });
+      const record = await Record.findOne({
+        $and: [{ date: date }, { userId: user._id }],
+      });
 
       const subject = req.body.subject;
       const subject_time = req.body.subject_time;
@@ -67,7 +69,9 @@ router.get("/record/:date", async (req, res) => {
     const user = await User.findOne({ username: username });
     if (user.password === password) {
       const date = req.params.date;
-      const record = await Record.findOne({ date: date });
+      const record = await Record.findOne({
+        $and: [{ date: date }, { userId: user._id }],
+      });
       return res.status(200).json(record);
     } else {
       return res.status(403).json("あなたは他人の記録を見ることはできません");
