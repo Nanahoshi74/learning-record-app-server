@@ -98,4 +98,26 @@ router.get("/all", async (req, res) => {
   }
 });
 
+//記録をつけたすべての日にちをDateオブジェクトで返す
+
+router.get("/all/date", async (req, res) => {
+  const username = req.query.username;
+  const password = req.query.password;
+  try {
+    const user = await User.findOne({ username: username });
+    if (user.password === password) {
+      const records = await Record.find({ userId: user._id });
+      const dates = records.map((record) => {
+        const date = new Date(record.date);
+        return date;
+      });
+      return res.status(200).json(dates);
+    } else {
+      return res.status(403).json("あなたは他人の記録を見ることはできません");
+    }
+  } catch (err) {
+    return res.status(500).json(err);
+  }
+});
+
 module.exports = router;
